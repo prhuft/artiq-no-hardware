@@ -25,6 +25,8 @@ class SingleAtomLoading(EnvExperiment):
         x1,x2 = domain
 
         fmax = poisson(mu_bg, mu_bg) # the maximum
+        
+        # these arrays exist so we could plot the points (x,f) and (x,y) to verify the distribution sampling
         y_dist = np.empty(n) 
         f_dist = np.empty(n)
         x_dist = np.empty(n) # this is the distribution we want
