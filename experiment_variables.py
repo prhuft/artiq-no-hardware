@@ -12,7 +12,10 @@ class ExperimentVariables(EnvExperiment):
         # kwargs is a dictionary of keyword arguments for the appropriate ARTIQ value function, e.g. NumberValue.
         # see the examples below.
         
-        # list of the global experiment variables. these must be valid python variable names
+        # list of the global experiment variables. these must be valid python variable names. 
+        # the values entered are default values that are only used to initialize the GUI the very 
+        # first time that the code is run with the new variable. i.e., after you add a new variable,
+        # the next time the code runs it will pull the value from the dataset, not this list.
         self.vars_list = [
             Variable("fMHz_cooling_dds", 111.0*MHz, NumberValue, {'type':'float', 'unit': 'MHz'}),
             Variable("pdB_cooling_dds", -4, NumberValue, {'type': 'float'}),
@@ -40,4 +43,4 @@ class ExperimentVariables(EnvExperiment):
     def run(self):
     
         for var in self.vars_list:
-            self.set_dataset(var.name, var.value, broadcast=True, persist=True)
+            self.set_dataset(var.name, getattr(self, var.name), broadcast=True, persist=True)
