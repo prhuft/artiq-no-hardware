@@ -34,6 +34,9 @@ class FakeUrukul:
 # test class              
 class FakeExperiment(EnvExperiment):
 
+    # todo: this approach is not too bad, but can we define hardware aliases elsewhere and make them global
+    # so we don't still have to declare the hardware channels explicitly in every experiment?
+    # probably we can do this in a base experiment, and then our experiments will inherit from the base exp.
     def build(self):
         # with actual hardware we would use self.setattr_device("device")
         self.urukul0_ch0 = FakeUrukul()
