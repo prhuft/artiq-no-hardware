@@ -4,19 +4,36 @@ Map devices defined in a parent experiment to aliases
 
 from artiq.experiment import *
 
+NO_HARDWARE = True
 
 class DeviceAliases:
 
     alias_map = {
-        "urukul0_ch0": "dds_FORT",
-        "urukul0_ch1": "dds_cooling_SP"
+        "dds_FORT": "urukul0_ch0",
+        "dds_cooling_SP": "urukul0_ch1"
     }
 
-    def __init__(self, experiment):
-        for key,val in self.alias_map.items():
-            if hasattr(experiment, key):
-                print(f"setting attr {key} to {val}")
-                setattr(experiment, val, getattr(experiment,key))
+    def __init__(self, experiment, device_aliases):
+        
+        for alias in device_aliases:
+            if alias in self.alias_map.keys():
+                try:
+                    
+                    dev_name = self.alias_map[alias]
+                    
+                    if NO_HARDWARE:
+                        setattr(experiment, dev_name, FakeUrukul())
+                    else:
+                        # setattr for the device, using the device name from device_db.py
+                        experiment.setattr_device(dev_name)
+                    
+                    # make an attribute named alias which points to the device object
+                    print(f"setattr self.{alias} = self.{dev_name}")
+                    setattr(experiment, alias, getattr(experiment,dev_name))
+
+                except KeyError:
+                    print(f"KeyError: {alias} not defined in alias map. Please define it.")
+
                 
 class FakeSwitch:
 
@@ -32,18 +49,17 @@ class FakeUrukul:
         self.sw = FakeSwitch()
               
 # test class              
-class FakeExperiment(EnvExperiment):
+class DeviceAliasTest(EnvExperiment):
 
-    # todo: this approach is not too bad, but can we define hardware aliases elsewhere and make them global
-    # so we don't still have to declare the hardware channels explicitly in every experiment?
-    # probably we can do this in a base experiment, and then our experiments will inherit from the base exp.
     def build(self):
-        # with actual hardware we would use self.setattr_device("device")
-        self.urukul0_ch0 = FakeUrukul()
         
         # map the hardware channels
-        DeviceAliases(experiment=self)
-        assert hasattr(self, DeviceAliases.alias_map['urukul0_ch0']), f"whoops, still missing attr {DeviceAliases.alias_map['urukul0_ch0']}"
+        DeviceAliases(
+            experiment=self, 
+            device_aliases=[
+                'dds_FORT',
+                'dds_cooling_SP'
+            ])
     
     def run(self):
         self.dds_FORT.sw.on()
