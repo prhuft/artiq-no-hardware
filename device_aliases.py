@@ -53,7 +53,8 @@ class DeviceAliasTest(EnvExperiment):
 
     def build(self):
         
-        # map the hardware channels
+        # this will do setattr_device using the device names from device_db, 
+        # and then define attributes which point to the device objects, using these aliases
         DeviceAliases(
             experiment=self, 
             device_aliases=[
